@@ -1,6 +1,11 @@
 # Web_game_development
 Some examples of basic games using web
 
+try it Online: http://semedi.github.io/web_games.
+
+
+or local:
+
 Dependencies:
 
 -Only Web server to "test" any game.
