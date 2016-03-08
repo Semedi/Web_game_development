@@ -15,4 +15,4 @@ Easy:
   python -m SimpleHTTPServer 8080
 
 go to your favorite browser and type:
- http://localhost:8080/
+  http://localhost:8080/
