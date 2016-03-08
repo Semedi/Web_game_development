@@ -6,27 +6,21 @@ try it Online: http://semedi.github.io/web_games.
 
 or local:
 
-Dependencies:
+###Dependencies:
 
--Only Web server to "test" any game.
+- [x] Web server
 
+###easy way:
 
-Easy:
-
--python installed
-   .$git clone https://github.com/Semedi/Web_game_development.git
+*python installed:
+   >$ git clone https://github.com/Semedi/Web_game_development.git
    
+   >$ cd web_games
    
-   .$cd Web_game_development
+   >$ cd (directory of the game)
    
-   .$cd (directory of the game)
-   
-   .$python -m SimpleHTTPServer 8080
+   >$ python -m SimpleHTTPServer 8080
   
-  
- 
-
-
 go to your favorite browser and type:
-   http://localhost:8080/
+   >http://localhost:8080/
   
