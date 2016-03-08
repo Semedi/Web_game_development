@@ -13,7 +13,7 @@ or local:
 ###easy way:
 
 *python installed:
-   >$ git clone https://github.com/Semedi/Web_game_development.git
+   >$ git clone https://github.com/Semedi/web_games.git
    
    >$ cd web_games
    
