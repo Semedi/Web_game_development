@@ -29,7 +29,7 @@ var OBJECT_LOG = 1,
     OBJECT_PLAYER = 2,
     OBJECT_ENEMY = 4,
     WATER = 8,
-    OBJECT_POWERUP = 16;
+    HOME = 16;
 
 var startGame = function() {
   var ua = navigator.userAgent.toLowerCase()
@@ -64,11 +64,13 @@ var playGame = function() {
 
   var gameLayer = new GameBoard();
 
-
+  gameLayer.add(new Home());
   gameLayer.add(new Water());
-  gameLayer.add(new Log(1,1,1%2));
-  gameLayer.add(new Log(2,2,2%2));
-  gameLayer.add(new Log(3,3,3%2));
+
+  for (var i = 1; i < 4; i++){
+    gameLayer.add(new Log(i,i,i%2));
+  }
+
   gameLayer.add(new Frog());
 
   for (var i = 1; i <=4; i++){
@@ -78,18 +80,11 @@ var playGame = function() {
 
   Game.setBoard(1, gameLayer);
 
-  /*
-  var board = new GameBoard();
-  board.add(new PlayerShip());
-  board.add(new Level(level1,winGame));
-  Game.setBoard(3,board);
-  Game.setBoard(5,new GamePoints(0));
-  */
 };
 
 var winGame = function() {
-  Game.setBoard(3,new TitleScreen("You win!",
-                                  "Press fire to play again",
+  Game.setBoard(1,new TitleScreen("You win!",
+                                  "Press up to play again",
                                   playGame));
 };
 
@@ -99,7 +94,7 @@ var loseGame = function() {
                                   playGame));
 };
 
-/*clases que heredan de sprite(pueden representar niveles, objetos...)
+/*clases que heredan de sprite(pueden representar niveles, objetos...) **********************************************************************
 * Practica 2: Frog*/
 var Field = function (){
 
@@ -292,6 +287,25 @@ Water.prototype = new Sprite();
 Water.prototype.type = WATER;
 
 
+var Home = function(){
+  this.y = 0;
+  this.w = Game.width;
+  this.h = square;
+  this.step = function(dt){
+    var player = this.board.collide(this,OBJECT_PLAYER);
+
+    if(player)
+      winGame();
+
+  };
+
+  this.draw = function(){};
+};
+
+Home.prototype = new Sprite();
+Home.prototype.type = HOME;
+
+
 var Death = function(centerX, centerY){
 
   this.setup('death', { frame: 0 });
@@ -313,7 +327,7 @@ Death.prototype.step = function(dt) {
 
 /*
  * Fin Espacio de clases (sprites)
- * ********************************************
+ * **************************************************************************************************************************
 * */
 
 var Starfield = function(speed,opacity,numStars,clear) {
@@ -534,6 +548,7 @@ Explosion.prototype.step = function(dt) {
   }
 };
 
+//inizializa el juego:
 window.addEventListener("load", function() {
   Game.initialize("game",sprites,startGame);
 });
