@@ -23,10 +23,12 @@ var enemies = {
               B: 150, C: 1.2, E: 75 }
 };
 
-var OBJECT_PLAYER = 1,
-    OBJECT_PLAYER_PROJECTILE = 2,
+var square = 48;
+
+var OBJECT_LOG = 1,
+    OBJECT_PLAYER = 2,
     OBJECT_ENEMY = 4,
-    OBJECT_ENEMY_PROJECTILE = 8,
+    WATER = 8,
     OBJECT_POWERUP = 16;
 
 var startGame = function() {
@@ -65,12 +67,31 @@ var level1 = [
 *Metodo playgame, inicializa  los board y el escenario de juego
 * */
 var playGame = function() {
-  var board = new GameBoard();
+  var groundLayer = new GameBoard();
+  var gameLayer = new GameBoard();
 
 
-  board.add(new Field());
-  board.add(new Frog());
-  Game.setBoard(0, board);
+  groundLayer.add(new Field());
+  gameLayer.add(new Water());
+
+
+
+  for (var i = 1; i <= 3; i++){
+    gameLayer.add(new Log(i,i,i%2));
+
+  }
+
+  gameLayer.add(new Frog());
+
+  for (var i = 1; i <=4; i++){
+    gameLayer.add(new Car(i,i,i+2,i%2));
+  }
+
+
+
+
+  Game.setBoard(0, groundLayer);
+  Game.setBoard(1, gameLayer);
 
   /*
   var board = new GameBoard();
@@ -105,54 +126,172 @@ var Field = function (){
 
   };
 };
+Field.prototype = new Sprite();
 
 var Frog = function(){
 
-    this.setup('frog',{});
+    this.setup('frog',{vx:0, vy:0});
     this.x = Game.width/2-15;
     this.y = Game.height - this.h;
     var fixedTime = 0.100;
     var time = 0;
-    var movement = 50;
-
+    var movement = square;
 
     this.step = function(dt){
-
-        var despx = 0;
-        var despy = 0;
         time+=dt;
+
             if(Game.keys['left']) {
-                    despx = -movement;
+                    this.vx = -movement;
             }
             else if(Game.keys['right']) {
-                    despx = movement;
+                    this.vx = movement;
             }
             else if (Game.keys['up'])
-                despy = movement;
+                this.vy = movement;
             else if (Game.keys['down'])
-                despy = -movement;
+                this.vy = -movement;
 
 
             if (time > fixedTime){
                 time = 0;
-                this.x+=despx;
-                this.y+=despy;
+                this.x+=this.vx;
+                this.y+=this.vy;
             }
 
             if(this.x < 0) this.x = 0;
-            else if(this.x > Game.width - this.w)
-                this.x = Game.width - this.w;
+            else if(this.x > Game.width-this.w/2)
+                this.x = Game.width-this.w/2;
+
+            if(this.y < 0) this.y = 0;
+            else if (this.y > Game.height - this.h)
+                this.y = Game.height - this.h;
+
+            var collision = this.board.collide(this,OBJECT_ENEMY);
+
+            if(collision){
+              collision.hit();
+            }
 
 
+            this.vx= 0;
+            this.vy= 0;
 
     };
+
+    this.onLog = function(velocity){
+      this.x+= velocity;
+    };
+
+    this.onWater = function(){
+      console.log("en el agua");
+    };
+
+
 
 };
 
 
-/* mecanismo de herencia Javascrit :*/
-Field.prototype = new Sprite();
 Frog.prototype = new Sprite();
+Frog.prototype.type = OBJECT_PLAYER;
+
+
+
+
+/*direction:
+*   value 0: hacia la derecha
+*   value 1: hacia la izquierda
+* */
+var Car = function(carType,row, vel, dir){
+    var t ="car"+carType;
+    this.setup(t,{vx:vel*10, direction:dir});
+    this.y=(Game.height-this.h)-row*square;
+    this.x=Game.width*dir;
+
+};
+
+/* mecanismo de herencia Javascrit :*/
+Car.prototype = new Sprite();
+
+Car.prototype.type = OBJECT_ENEMY;
+Car.prototype.step = function(dt){
+
+        var movement = this.vx*dt;
+        if (this.direction) movement = -movement;
+
+        this.x += movement;
+
+        //extremo izquierdo
+        if(this.x < -this.w) {
+          this.x = Game.width;
+         }
+
+         //extremo derecho
+        else if(this.x > Game.width) {
+            this.x = 0-this.w;
+        }
+};
+
+Car.prototype.hit = function(){
+  console.log("jaime cabron");
+};
+
+
+var Log = function(vel, row, dir ){
+
+  this.setup('trunk',{vx:vel*10, direction:dir});
+  this.y=square*row;
+  this.x=Game.width*dir;
+
+};
+Log.prototype = new Sprite();
+Log.prototype.type = OBJECT_LOG;
+
+Log.prototype.step = function(dt){
+
+  var movement = this.vx*dt;
+  if (this.direction) movement = -movement;
+
+  this.x += movement;
+
+  //extremo izquierdo
+  if(this.x < -this.w) {
+    this.x = Game.width;
+   }
+
+   //extremo derecho
+  else if(this.x > Game.width) {
+      this.x = 0-this.w;
+  }
+  var collision = this.board.collide(this,OBJECT_PLAYER);
+
+  if(collision)
+    collision.onLog(movement, this.x);
+
+
+
+};
+
+var Water = function(){
+  this.y = square;
+  this.w = Game.width;
+  this.h = 3*square;
+  this.step = function(dt){
+    var collision = this.board.collide(this,OBJECT_PLAYER);
+
+    if(collision)
+      collision.onWater();
+
+  };
+
+  this.draw = function(){};
+};
+
+Water.prototype = new Sprite();
+Water.prototype.type = WATER;
+
+
+
+
 /*
  * Fin Espacio de clases (sprites)
  * ********************************************
@@ -266,7 +405,7 @@ var PlayerMissile = function(x,y) {
 };
 
 PlayerMissile.prototype = new Sprite();
-PlayerMissile.prototype.type = OBJECT_PLAYER_PROJECTILE;
+PlayerMissile.prototype.type = OBJECT_LOG;
 
 PlayerMissile.prototype.step = function(dt)  {
   this.y += this.vy * dt;
@@ -305,7 +444,7 @@ Enemy.prototype.step = function(dt) {
 
   var collision = this.board.collide(this,OBJECT_PLAYER);
   if(collision) {
-    collision.hit(this.damage);
+    collision.hit();
     this.board.remove(this);
   }
 
@@ -346,7 +485,7 @@ var EnemyMissile = function(x,y) {
 };
 
 EnemyMissile.prototype = new Sprite();
-EnemyMissile.prototype.type = OBJECT_ENEMY_PROJECTILE;
+EnemyMissile.prototype.type = WATER;
 
 EnemyMissile.prototype.step = function(dt)  {
   this.y += this.vy * dt;
