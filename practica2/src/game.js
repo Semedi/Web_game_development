@@ -32,15 +32,13 @@ var OBJECT_LOG = 1,
     OBJECT_POWERUP = 16;
 
 var startGame = function() {
-  var ua = navigator.userAgent.toLowerCase();
+  var ua = navigator.userAgent.toLowerCase()
+  var groundLayer = new GameBoard();
+  groundLayer.add(new Field());
 
+  Game.setBoard(0, groundLayer);
 
-    Game.setBoard(0,new Field());
-    Game.setBoard(1,new Starfield(50,0.6,100));
-    Game.setBoard(2,new Starfield(100,1.0,50));
-    Game.setBoard(3,new TitleScreen("Alien Invasion",
-                                  "Press fire to start playing",
-                                  playGame));
+  Game.setBoard(1,new TitleScreen("Frog","Press 'up' to start", playGame));
 };
 
 
@@ -63,10 +61,9 @@ var level1 = [
 *Metodo playgame, inicializa  los board y el escenario de juego
 * */
 var playGame = function() {
-  var groundLayer = new GameBoard();
+
   var gameLayer = new GameBoard();
 
-  groundLayer.add(new Field());
   gameLayer.add(new Water());
   gameLayer.add(new Log(1,1,1%2));
   gameLayer.add(new Log(2,2,2%2));
@@ -78,9 +75,6 @@ var playGame = function() {
   }
 
 
-
-
-  Game.setBoard(0, groundLayer);
   Game.setBoard(1, gameLayer);
 
   /*
@@ -99,8 +93,8 @@ var winGame = function() {
 };
 
 var loseGame = function() {
-  Game.setBoard(3,new TitleScreen("You lose!",
-                                  "Press fire to play again",
+  Game.setBoard(1,new TitleScreen("You lose!",
+                                  "Press up to play again",
                                   playGame));
 };
 
@@ -139,9 +133,9 @@ var Frog = function(){
         else if(Game.keys['right'])
           this.vx = movement;
         else if (Game.keys['up'])
-          this.vy = movement;
-        else if (Game.keys['down'])
           this.vy = -movement;
+        else if (Game.keys['down'])
+          this.vy = movement;
 
 
         if (time > fixedTime){
@@ -167,6 +161,8 @@ var Frog = function(){
     this.die = function(){
       this.board.add(new Death(this.x + this.w/2,this.y + this.h/2));
       this.board.remove(this);
+      setTimeout(loseGame, 1000);
+
     };
 
     this.onLog = function(velocity){
@@ -238,7 +234,7 @@ Car.prototype.step = function(dt){
 };
 
 Car.prototype.hit = function(){
-  console.log("jaime cabron");
+
 };
 
 
@@ -540,5 +536,5 @@ Explosion.prototype.step = function(dt) {
 };
 
 window.addEventListener("load", function() {
-  Game.initialize("game",sprites,playGame);
+  Game.initialize("game",sprites,startGame);
 });
