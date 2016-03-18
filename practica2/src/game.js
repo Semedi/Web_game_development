@@ -34,15 +34,11 @@ var OBJECT_LOG = 1,
 var startGame = function() {
   var ua = navigator.userAgent.toLowerCase();
 
-  // Only 1 row of stars
-  if(ua.match(/android/)) {
-    Game.setBoard(0,new Starfield(50,0.6,100,true));
-  } else {
-    Game.setBoard(0,new Starfield(20,0.4,100,true));
+
+    Game.setBoard(0,new Field());
     Game.setBoard(1,new Starfield(50,0.6,100));
     Game.setBoard(2,new Starfield(100,1.0,50));
-  }
-  Game.setBoard(3,new TitleScreen("Alien Invasion",
+    Game.setBoard(3,new TitleScreen("Alien Invasion",
                                   "Press fire to start playing",
                                   playGame));
 };
@@ -70,17 +66,11 @@ var playGame = function() {
   var groundLayer = new GameBoard();
   var gameLayer = new GameBoard();
 
-
   groundLayer.add(new Field());
   gameLayer.add(new Water());
-
-
-
-  for (var i = 1; i <= 3; i++){
-    gameLayer.add(new Log(i,i,i%2));
-
-  }
-
+  gameLayer.add(new Log(1,1,1%2));
+  gameLayer.add(new Log(2,2,2%2));
+  gameLayer.add(new Log(3,3,3%2));
   gameLayer.add(new Frog());
 
   for (var i = 1; i <=4; i++){
@@ -133,57 +123,67 @@ var Frog = function(){
     this.setup('frog',{vx:0, vy:0});
     this.x = Game.width/2-15;
     this.y = Game.height - this.h;
-    var fixedTime = 0.100;
+
+    var grounded = true;
+    var fixedTime = 0.1050;
     var time = 0;
     var movement = square;
+
 
     this.step = function(dt){
         time+=dt;
 
-            if(Game.keys['left']) {
-                    this.vx = -movement;
-            }
-            else if(Game.keys['right']) {
-                    this.vx = movement;
-            }
-            else if (Game.keys['up'])
-                this.vy = movement;
-            else if (Game.keys['down'])
-                this.vy = -movement;
+
+        if(Game.keys['left'])
+          this.vx = -movement;
+        else if(Game.keys['right'])
+          this.vx = movement;
+        else if (Game.keys['up'])
+          this.vy = movement;
+        else if (Game.keys['down'])
+          this.vy = -movement;
 
 
-            if (time > fixedTime){
-                time = 0;
-                this.x+=this.vx;
-                this.y+=this.vy;
-            }
+        if (time > fixedTime){
+          time = 0;
+          this.x+=this.vx;
+          this.y+=this.vy;
+        }
 
-            if(this.x < 0) this.x = 0;
-            else if(this.x > Game.width-this.w/2)
-                this.x = Game.width-this.w/2;
+        if(this.x < 0) this.x = 0;
+        else if(this.x > Game.width-this.w/2)
+          this.x = Game.width-this.w/2;
 
-            if(this.y < 0) this.y = 0;
-            else if (this.y > Game.height - this.h)
-                this.y = Game.height - this.h;
-
-            var collision = this.board.collide(this,OBJECT_ENEMY);
-
-            if(collision){
-              collision.hit();
-            }
+        if(this.y < 0) this.y = 0;
+        else if (this.y > Game.height - this.h)
+          this.y = Game.height - this.h;
 
 
-            this.vx= 0;
-            this.vy= 0;
+        this.vx= 0;
+        this.vy= 0;
 
     };
 
+    this.die = function(){
+      this.board.add(new Death(this.x + this.w/2,this.y + this.h/2));
+      this.board.remove(this);
+    };
+
     this.onLog = function(velocity){
+      grounded=true;
       this.x+= velocity;
     };
 
     this.onWater = function(){
-      console.log("en el agua");
+      this.die();
+    };
+
+    this.isGrounded = function(){
+      return grounded;
+    };
+
+    this.hit = function(){
+      this.die();
     };
 
 
@@ -229,6 +229,12 @@ Car.prototype.step = function(dt){
         else if(this.x > Game.width) {
             this.x = 0-this.w;
         }
+
+        var collision = this.board.collide(this,OBJECT_PLAYER);
+
+        if(collision)
+          collision.hit();
+
 };
 
 Car.prototype.hit = function(){
@@ -276,10 +282,11 @@ var Water = function(){
   this.w = Game.width;
   this.h = 3*square;
   this.step = function(dt){
-    var collision = this.board.collide(this,OBJECT_PLAYER);
 
-    if(collision)
-      collision.onWater();
+    var player = this.board.collide(this,OBJECT_PLAYER);
+
+    if(player && !player.board.collide(player, OBJECT_LOG))
+        player.onWater();
 
   };
 
@@ -288,6 +295,23 @@ var Water = function(){
 
 Water.prototype = new Sprite();
 Water.prototype.type = WATER;
+
+
+var Death = function(centerX, centerY){
+
+  this.setup('death', { frame: 0 });
+  this.x = centerX - this.w/2;
+  this.y = centerY - this.h/2;
+};
+
+Death.prototype = new Sprite();
+
+Death.prototype.step = function(dt) {
+  this.frame++;
+  if(this.frame > 4) {
+    this.board.remove(this);
+  }
+};
 
 
 
