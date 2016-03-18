@@ -64,6 +64,7 @@ var playGame = function() {
 
   var gameLayer = new GameBoard();
 
+
   gameLayer.add(new Water());
   gameLayer.add(new Log(1,1,1%2));
   gameLayer.add(new Log(2,2,2%2));
@@ -137,7 +138,6 @@ var Frog = function(){
         else if (Game.keys['down'])
           this.vy = movement;
 
-
         if (time > fixedTime){
           time = 0;
           this.x+=this.vx;
@@ -162,7 +162,6 @@ var Frog = function(){
       this.board.add(new Death(this.x + this.w/2,this.y + this.h/2));
       this.board.remove(this);
       setTimeout(loseGame, 1000);
-
     };
 
     this.onLog = function(velocity){
