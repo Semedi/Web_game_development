@@ -68,7 +68,8 @@ var playGame = function() {
   gameLayer.add(new Water());
 
   for (var i = 1; i < 4; i++){
-    gameLayer.add(new Log(i,i,i%2));
+    var spawner = new Log_spawner(new Log(i,i*2,i%2), 3);
+    gameLayer.add(spawner);
   }
 
   gameLayer.add(new Frog());
@@ -210,15 +211,11 @@ Car.prototype.step = function(dt){
 
         this.x += movement;
 
-        //extremo izquierdo
-        if(this.x < -this.w) {
-          this.x = Game.width;
-         }
 
-         //extremo derecho
-        else if(this.x > Game.width) {
-            this.x = 0-this.w;
-        }
+         //extremos
+        if(this.x > Game.width || this.x < -this.w)
+          this.board.remove(this);
+
 
         var collision = this.board.collide(this,OBJECT_PLAYER);
 
@@ -232,12 +229,20 @@ Car.prototype.hit = function(){
 };
 
 
-var Log = function(vel, row, dir ){
+var Log = function(row, vel, dir ){
+
+  var row = row;
+  var vel = vel;
+  var dir = dir;
 
   this.setup('trunk',{vx:vel*10, direction:dir});
   this.y=square*row;
-  this.x=Game.width*dir;
+  this.x = (dir != 0) ? Game.width : this.w * (-1);
 
+
+  this.getRow = function(){ return row; };
+  this.getVelocity = function(){ return vel; };
+  this.getDirection = function(){ return dir; };
 };
 Log.prototype = new Sprite();
 Log.prototype.type = OBJECT_LOG;
@@ -249,15 +254,9 @@ Log.prototype.step = function(dt){
 
   this.x += movement;
 
-  //extremo izquierdo
-  if(this.x < -this.w) {
-    this.x = Game.width;
-   }
-
-   //extremo derecho
-  else if(this.x > Game.width) {
-      this.x = 0-this.w;
-  }
+  //extremos
+  if(this.x > Game.width || this.x < -this.w)
+   this.board.remove(this);
   var collision = this.board.collide(this,OBJECT_PLAYER);
 
   if(collision)
@@ -322,7 +321,58 @@ Death.prototype.step = function(dt) {
   }
 };
 
+var Spawner = function (){
+  this.t = 0;
 
+};
+
+Spawner.prototype.draw = function(){};
+Spawner.prototype.step = function(dt){
+  this.t+=dt;
+
+  if (this.t >= this.spawn_time){
+    this.t = 0;
+    this.board.add(this.generate());
+
+    console.log("working");
+  }
+
+
+};
+
+
+var Car_spawner = function(prototype, time){
+  this.spawn_time = time;
+
+  this.generate = function(){
+    var car = new Car();
+
+    car.type=prototype.type;
+    car.row = prototype.row;
+    car.vel = prototype.vel;
+    car.dir = prototype.dir;
+
+    return car;
+
+  };
+
+};
+
+var Log_spawner = function(prototype, time){
+  this.spawn_time = time;
+
+  this.generate = function(){
+    var row = prototype.getRow();
+    var vel = prototype.getVelocity();
+    var dir = prototype.getDirection();
+
+    return new Log(row, vel, dir);
+  };
+
+};
+
+Log_spawner.prototype = new Spawner();
+Car_spawner.prototype = new Spawner();
 
 
 /*
