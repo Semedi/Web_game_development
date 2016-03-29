@@ -197,9 +197,12 @@ var GameBoard = function() {
   this.cnt = {};
 
   // Add a new object to the object list
-  this.add = function(obj) {
+  this.add = function(obj, mode) {
+    
     obj.board=this;
-    this.objects.push(obj);
+    ((mode) ?  this.objects.push(obj) : this.objects.unshift(obj));
+
+
     this.cnt[obj.type] = (this.cnt[obj.type] || 0) + 1;
     return obj;
   };
