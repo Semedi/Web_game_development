@@ -68,14 +68,20 @@ var playGame = function() {
   gameLayer.add(new Water());
 
   for (var i = 1; i < 4; i++){
-    var spawner = new Log_spawner(new Log(i,i*2,i%2), 3);
+
+    var prototype = new Log(i,i+3,i%2)
+    var spawner = new Log_spawner(prototype, 4);
+    gameLayer.add(prototype);
     gameLayer.add(spawner);
   }
 
   gameLayer.add(new Frog());
 
   for (var i = 1; i <=4; i++){
-    gameLayer.add(new Car(i,i,i+2,i%2));
+    prototype = new Car(i,i,i+2,i%2);
+    spawner = new Car_spawner(prototype, 4);
+    gameLayer.add(prototype)
+    gameLayer.add(spawner);
   }
 
 
@@ -193,10 +199,22 @@ Frog.prototype.type = OBJECT_PLAYER;
 *   value 1: hacia la izquierda
 * */
 var Car = function(carType,row, vel, dir){
+
+    var type = carType;
+    var row = row;
+    var vel = vel;
+    var dir = dir;
+
     var t ="car"+carType;
+
     this.setup(t,{vx:vel*10, direction:dir});
     this.y=(Game.height-this.h)-row*square;
-    this.x=Game.width*dir;
+    this.x = (dir) ? Game.width : this.w * (-1);
+
+    this.getType = function(){ return type };
+    this.getRow = function(){ return row; };
+    this.getVelocity = function(){ return vel; };
+    this.getDirection = function(){ return dir; };
 
 };
 
@@ -237,7 +255,7 @@ var Log = function(row, vel, dir ){
 
   this.setup('trunk',{vx:vel*10, direction:dir});
   this.y=square*row;
-  this.x = (dir != 0) ? Game.width : this.w * (-1);
+  this.x = (dir) ? Game.width : this.w * (-1);
 
 
   this.getRow = function(){ return row; };
@@ -324,6 +342,7 @@ Death.prototype.step = function(dt) {
 var Spawner = function (){
   this.t = 0;
 
+
 };
 
 Spawner.prototype.draw = function(){};
@@ -342,23 +361,24 @@ Spawner.prototype.step = function(dt){
 
 
 var Car_spawner = function(prototype, time){
+
   this.spawn_time = time;
 
   this.generate = function(){
-    var car = new Car();
 
-    car.type=prototype.type;
-    car.row = prototype.row;
-    car.vel = prototype.vel;
-    car.dir = prototype.dir;
+    var type = prototype.getType();
+    var row = prototype.getRow();
+    var vel = prototype.getVelocity();
+    var dir = prototype.getDirection();
 
-    return car;
+    return new Car(type, row, vel, dir);
 
   };
 
 };
 
 var Log_spawner = function(prototype, time){
+
   this.spawn_time = time;
 
   this.generate = function(){
@@ -368,6 +388,7 @@ var Log_spawner = function(prototype, time){
 
     return new Log(row, vel, dir);
   };
+
 
 };
 
