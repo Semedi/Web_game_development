@@ -1,27 +1,26 @@
 # Web_game_development
 Some examples of basic games using web
 
-Dependencies:
-
--Only Web server to "test" any game.
+try it Online: http://semedi.github.io/web_games.
 
 
-Easy:
+or local:
 
--python installed
-   .$git clone https://github.com/Semedi/Web_game_development.git
+###Dependencies:
+
+- [x] Web server
+
+###easy way:
+
+*python installed:
+   >$ git clone https://github.com/Semedi/web_games.git
    
+   >$ cd web_games
    
-   .$cd Web_game_development
+   >$ cd (directory of the game)
    
-   .$cd (directory of the game)
-   
-   .$python -m SimpleHTTPServer 8080
+   >$ python -m SimpleHTTPServer 8080
   
-  
- 
-
-
 go to your favorite browser and type:
-   http://localhost:8080/
+   >http://localhost:8080/
   
