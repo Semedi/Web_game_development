@@ -9,6 +9,7 @@
 *.dll.config
 *.cache
 *.suo
+*.pdf
 # Include dlls if they’re in the NuGet packages directory
 !/packages/*/lib/*.dll
 # Include dlls if they're in the CommonReferences directory
@@ -26,6 +27,7 @@ obj/
 AlienInvasion_example/
 pruebas/
 TestResults/
+practica3/material/
 ###################
 # Web publish log #
 ###################
