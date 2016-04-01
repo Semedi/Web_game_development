@@ -111,11 +111,12 @@ window.addEventListener("load",function() {
 			this._super(p, {
 				sheet: "bloopa", // Setting a sprite sheet sets sprite width and height
 				frame: 0,
-				vx: 75,
-				x: 350,
-				y: 500
+				gravity: 0,
+				vy: 100,
+				x: 450,
+				y: 400
 			});
-
+			this.timeRange= 0;
 			this.add('2d, aiBounce');
 
 			this.on("bump.left,bump.right,bump.bottom",function(collision) {
@@ -135,6 +136,18 @@ window.addEventListener("load",function() {
 	 }, //init
 
 		step: function(dt) {
+
+			this.timeRange+=dt;
+			/**/
+			if(this.p.vy == 0){
+				this.timeRange=0;
+				this.p.vy = -50;
+			}
+
+			if (this.timeRange >= 2)
+				this.p.vy = 150;
+
+
 		} //step
 
 	});
@@ -147,11 +160,12 @@ window.addEventListener("load",function() {
 		Q.stageTMX("level.tmx",stage);
 		var player = stage.insert(new Q.Player());
 
-		stage.insert(new Q.Goomba());
 		stage.insert(new Q.Bloopa());
+		stage.insert(new Q.Goomba());
+
 		stage.insert(new Q.Princess());
 
-		stage.add("viewport").follow(stage.insert(player));
+		stage.add("viewport").follow(player);
 		stage.viewport.offsetX = -100;
 		stage.viewport.offsetY = 150;
 
