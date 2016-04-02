@@ -10,6 +10,42 @@ window.addEventListener("load",function() {
 
 
 
+
+
+
+
+/*COMPONENTES*/
+/****************************************************************************************************/
+Q.component("defaultEnemy", {
+	added: function() {
+
+
+		var self = this;
+
+		this.entity.on("bump.top", function(collision){
+			if(collision.obj.isA("Player")){
+				collision.obj.p.vy = -300;
+				self.entity.destroy();
+			}
+		});
+		//this.entity.on("hit.sprite",this,"hit");
+
+
+		this.entity.on("bump.left,bump.right,bump.bottom",function(collision) {
+			if(collision.obj.isA("Player")) {
+				Q.stageScene("endGame",1, { label: "Game over" });
+				collision.obj.destroy();
+			}
+		});
+
+	}
+});
+
+/***************************************************************************************************/
+
+
+
+
 	Q.Sprite.extend("Player",{
 	// the init constructor is called on creation
 		init: function(p) {
@@ -112,22 +148,7 @@ window.addEventListener("load",function() {
 				y: 380
 			});
 
-			this.add('2d, aiBounce, animation');
-
-			this.on("bump.left,bump.right,bump.bottom",function(collision) {
-	 			if(collision.obj.isA("Player")) {
-		 			//Q.stageScene("endGame",1, { label: "You Died" });
-		 			collision.obj.destroy();
-					Q.stageScene("level1");
-	 			}
- 			});
-
-		 this.on("bump.top",function(collision) {
-			 if(collision.obj.isA("Player")) {
-				 this.destroy();
-				 collision.obj.p.vy = -300;
-			 }
-		 });
+			this.add('2d, aiBounce, animation, defaultEnemy');
 
 	 }, //init
 
@@ -151,21 +172,7 @@ window.addEventListener("load",function() {
 				y: 400
 			});
 			this.timeRange= 0;
-			this.add('2d, aiBounce, animation');
-
-			this.on("bump.left,bump.right,bump.bottom",function(collision) {
-	 			if(collision.obj.isA("Player")) {
-		 			Q.stageScene("endGame",1, { label: "Game over" });
-		 			collision.obj.destroy();
-	 			}
- 			});
-
-		 this.on("bump.top",function(collision) {
-			 if(collision.obj.isA("Player")) {
-				 this.destroy();
-				 collision.obj.p.vy = -300;
-			 }
-		 });
+			this.add('2d, aiBounce, animation, defaultEnemy');
 
 		 this.play('jump');
 	 }, //init
