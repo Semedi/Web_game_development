@@ -9,7 +9,10 @@ window.addEventListener("load",function() {
 	}).controls().touch();
 
 
-
+	Q.SPRITE_PLAYER = 1;
+	Q.SPRITE_COLLECTABLE = 2;
+	Q.SPRITE_ENEMY = 4;
+	Q.SPRITE_DOOR = 8;
 
 
 
@@ -23,13 +26,15 @@ Q.component("defaultEnemy", {
 		var self = this;
 
 		this.entity.on("bump.top", function(collision){
+
 			if(collision.obj.isA("Player")){
+
 				collision.obj.p.vy = -300;
-				self.entity.destroy();
+				self.entity.play('dead');
+				self.entity.p.dead = true;
+				self.entity.p.deadTimer = 0;
 			}
 		});
-		//this.entity.on("hit.sprite",this,"hit");
-
 
 		this.entity.on("bump.left,bump.right,bump.bottom",function(collision) {
 			if(collision.obj.isA("Player")) {
@@ -136,30 +141,62 @@ Q.component("defaultEnemy", {
 
 	});
 
-	Q.Sprite.extend("Goomba",{
-	// the init constructor is called on creation
-		init: function(p) {
-		// You can call the parent's constructor with this._super(..)
-			this._super(p, {
-				sheet: "goomba", // Setting a sprite sheet sets sprite width and height
-				sprite: "goomba",
-				vx: 75,
-				x: 1500,
-				y: 380
-			});
 
-			this.add('2d, aiBounce, animation, defaultEnemy');
+	Q.Sprite.extend("Enemy", {
+	  init: function(p,defaults) {
 
-	 }, //init
+	    this._super(p,Q._defaults(defaults||{},{
+	      vx: 50,
+	      defaultDirection: 'left',
+	      type: Q.SPRITE_ENEMY,
+	      collisionMask: Q.SPRITE_DEFAULT
+	    }));
 
-		step: function(dt) {
+	    this.add('2d, aiBounce, animation, defaultEnemy');
+	  },
+
+	  step: function(dt) {
+
+			var p = this.p;
+
+	    if(p.dead) {
+	      this.del('2d, aiBounce');
+	      this.p.deadTimer++;
+	      if (this.p.deadTimer > 24) {
+	        // Dead for 24 frames, remove it.
+	        this.destroy();
+	      }
+	      return;
+	    }
+
 			this.play('walk');
-		} //step
+
+
+
+	    p.vx += p.ax * dt;
+	    p.vy += p.ay * dt;
+
+	    p.x += p.vx * dt;
+	    p.y += p.vy * dt;
+	  }
 
 	});
 
 
-	Q.Sprite.extend("Bloopa",{
+	Q.Enemy.extend("Goomba",{
+		init: function(p){
+			this._super(p, {
+				sheet: "goomba",
+				sprite: "goomba",
+				x: 1500,
+				y: 380
+			});
+
+		}
+	});
+
+
+	Q.Enemy.extend("Bloopa",{
 	// the init constructor is called on creation
 		init: function(p) {
 		// You can call the parent's constructor with this._super(..)
@@ -168,26 +205,40 @@ Q.component("defaultEnemy", {
 				sprite: "bloopa",
 				gravity: 0,
 				vy: 100,
+				vx: 0,
 				x: 450,
 				y: 400
 			});
-			this.timeRange= 0;
-			this.add('2d, aiBounce, animation, defaultEnemy');
 
-		 this.play('jump');
+			this.timeRange= 0;
+
 	 }, //init
 
 		step: function(dt) {
 
+			var p = this.p;
+
+	    if(p.dead) {
+	      this.del('2d, aiBounce');
+	      this.p.deadTimer++;
+	      if (this.p.deadTimer > 24) {
+	        // Dead for 24 frames, remove it.
+	        this.destroy();
+	      }
+	      return;
+	    }
+
+
+			this.play('jump');
 			this.timeRange+=dt;
 			/**/
-			if(this.p.vy == 0){
+			if(p.vy == 0){
 				this.timeRange=0;
-				this.p.vy = -50;
+				p.vy = -50;
 			}
 
 			if (this.timeRange >= 2)
-				this.p.vy = 150;
+				p.vy = 150;
 
 
 		} //step
@@ -279,8 +330,8 @@ Q.component("defaultEnemy", {
 		Q.compileSheets("bloopa.png","bloopa.json");
 
 		Q.animations("mario_small", {
-			walk_right: { frames: [0,1,2], rate: 1/10, flip: false, loop: true },
-			walk_left: { frames:  [0,1,2], rate: 1/10, flip:"x", loop: true },
+			walk_right: { frames: [0,1,2], rate: 1/5, flip: false, loop: true },
+			walk_left: { frames:  [0,1,2], rate: 1/5, flip:"x", loop: true },
 			jump_right: { frames: [4], rate: 1/9, flip: false },
 			jump_left: { frames:  [4], rate: 1/9, flip: "x" },
 			stand_right: { frames:[0], rate: 1/9, flip: false },
