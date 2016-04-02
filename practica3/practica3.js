@@ -106,13 +106,13 @@ window.addEventListener("load",function() {
 		// You can call the parent's constructor with this._super(..)
 			this._super(p, {
 				sheet: "goomba", // Setting a sprite sheet sets sprite width and height
-				frame: 0,
+				sprite: "goomba",
 				vx: 75,
 				x: 1500,
 				y: 380
 			});
 
-			this.add('2d, aiBounce','animation');
+			this.add('2d, aiBounce, animation');
 
 			this.on("bump.left,bump.right,bump.bottom",function(collision) {
 	 			if(collision.obj.isA("Player")) {
@@ -132,6 +132,7 @@ window.addEventListener("load",function() {
 	 }, //init
 
 		step: function(dt) {
+			this.play('walk');
 		} //step
 
 	});
@@ -143,14 +144,14 @@ window.addEventListener("load",function() {
 		// You can call the parent's constructor with this._super(..)
 			this._super(p, {
 				sheet: "bloopa", // Setting a sprite sheet sets sprite width and height
-				frame: 0,
+				sprite: "bloopa",
 				gravity: 0,
 				vy: 100,
 				x: 450,
 				y: 400
 			});
 			this.timeRange= 0;
-			this.add('2d, aiBounce');
+			this.add('2d, aiBounce, animation');
 
 			this.on("bump.left,bump.right,bump.bottom",function(collision) {
 	 			if(collision.obj.isA("Player")) {
@@ -166,6 +167,7 @@ window.addEventListener("load",function() {
 			 }
 		 });
 
+		 this.play('jump');
 	 }, //init
 
 		step: function(dt) {
@@ -279,7 +281,19 @@ window.addEventListener("load",function() {
 			duck_right: { frames: [6], rate: 1/9, flip: false },
 			duck_left: { frames:  [6], rate: 1/9, flip: "x" },
 			die: { frames:  [12], rate: 1/9, flip: false }
-	});
+		});
+
+		Q.animations("bloopa", {
+			jump: { frames: [0,1], rate: 1/2, loop: true },
+			dead: { frames: [2], rate: 1/8 }
+		});
+
+		Q.animations("goomba", {
+			walk: { frames: [0,1], rate: 1/3, loop: true },
+			dead: { frames: [2], rate: 1/8 }
+		});
+
+
 
 		/*usamos sheet propio:*/
 		//Q.sheet("mario_small","mario_small.png", { tilew: 32, tileh: 32 });
