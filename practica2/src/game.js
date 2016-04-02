@@ -42,7 +42,7 @@ var playGame = function() {
   for (var i = 1; i < 4; i++){
 
     var prototype = new Log(i,i+3,i%2)
-    var spawner = new Log_spawner(prototype, 4);
+    var spawner = new Log_spawner(prototype, i+5);
     gameLayer.add(prototype, 0);
     gameLayer.add(spawner, 0);
   }

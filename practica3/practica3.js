@@ -16,8 +16,9 @@ window.addEventListener("load",function() {
 		// You can call the parent's constructor with this._super(..)
 			this._super(p, {
 				sheet: "marioR", // Setting a sprite sheet sets sprite width and height
-				frame: 0,
-				speed: 125,
+				sprite: "mario_small",
+				direction:"right",
+				speed: 160,
 				x: 150,
 				y: 380
 			});
@@ -28,12 +29,44 @@ window.addEventListener("load",function() {
 			// default input actions (left, right to move, up or action to jump)
 			// It also checks to make sure the player is on a horizontal surface before
 			// letting them jump.
-			this.add('2d, platformerControls');
+			this.add('2d, platformerControls, animation');
 
 		},
 
 		step: function(dt) {
+			var processed = false;
 
+			if(!processed){
+				if(this.p.vx > 0) {
+
+					if(this.p.landed > 0) {
+						this.play("walk_right");
+					}
+					else {
+						this.play("jump_right");
+					}
+
+					/*turning direction right*/
+					this.p.direction = "right";
+			 	}
+				else if(this.p.vx < 0) {
+
+					if(this.p.landed > 0) {
+						this.play("walk_left");
+					}
+				 	else {
+						this.play("jump_left");
+					}
+
+					/*turning direction left*/
+					this.p.direction = "left";
+	 	 		}
+				else // vx = 0
+					this.play("stand_" + this.p.direction);
+
+
+
+			}
 
 			if(this.p.y > 600){
 				Q.stageScene("endGame",1, { label: "Game over" });
@@ -79,7 +112,7 @@ window.addEventListener("load",function() {
 				y: 380
 			});
 
-			this.add('2d, aiBounce');
+			this.add('2d, aiBounce','animation');
 
 			this.on("bump.left,bump.right,bump.bottom",function(collision) {
 	 			if(collision.obj.isA("Player")) {
@@ -177,32 +210,81 @@ window.addEventListener("load",function() {
 	    x: Q.width/2, y: Q.height/2, fill: "rgba(0,0,0,0.5)"
 	  }));
 
-	  var button = box.insert(new Q.UI.Button({ x: 0, y: 0, fill: "#CCCCCC",
-	                                           label: "Play Again" }))
+	  var button = box.insert(new Q.UI.Button({ x: 0,
+																							y: 0, fill: "#CCCCCC",
+	                                           label: "Play Again" }));
+
+
 	  var label = box.insert(new Q.UI.Text({x:10, y: -10 - button.p.h,
 	                                        label: stage.options.label }));
 	  button.on("click",function() {
 	    Q.clearStages();
-	    Q.stageScene('level1');
+	    Q.stageScene('tittle');
 	  });
 	  box.fit(20);
 });
+
+	Q.scene('tittle', function(stage){
+
+		stage.insert(new Q.UI.Button({
+									asset: "mainTitle.png",
+									y: Q.height/2,
+									x: Q.width/2
+								}, function() {
+										Q.clearStages();
+										Q.stageScene("level1");
+								}, { keyActionName: 'confirm' }));
+
+
+		var container = stage.insert(new Q.UI.Container({ x: 0, y: 0}));
+		var label = container.insert(new Q.UI.Text({x:150,
+																								y: 40,
+																								label: "Press Enter to start",
+																								color: "red"
+																							}));
+		container.fit(20);
+
+
+
+	});
+
+
+
+
+
+
+
+
+
+
 /*********************************************************************/
 
 
 /* METODO DE CARGA DE RECUROS */
 /*******************************************************************/
-	Q.loadTMX("level.tmx, princess.png, mario_small.png, goomba.png, bloopa.png ,mario_small.json, goomba.json, bloopa.json", function(){
+	Q.loadTMX("level.tmx, mainTitle.png,  princess.png, mario_small.png, goomba.png, bloopa.png ,mario_small.json, goomba.json, bloopa.json", function(){
 
 	 // this will create the sprite sheets snail, slime and fly
 		Q.compileSheets("mario_small.png","mario_small.json");
 		Q.compileSheets("goomba.png","goomba.json");
 		Q.compileSheets("bloopa.png","bloopa.json");
 
+		Q.animations("mario_small", {
+			walk_right: { frames: [0,1,2], rate: 1/10, flip: false, loop: true },
+			walk_left: { frames:  [0,1,2], rate: 1/10, flip:"x", loop: true },
+			jump_right: { frames: [4], rate: 1/9, flip: false },
+			jump_left: { frames:  [4], rate: 1/9, flip: "x" },
+			stand_right: { frames:[0], rate: 1/9, flip: false },
+			stand_left: { frames: [0], rate: 1/9, flip:"x" },
+			duck_right: { frames: [6], rate: 1/9, flip: false },
+			duck_left: { frames:  [6], rate: 1/9, flip: "x" },
+			die: { frames:  [12], rate: 1/9, flip: false }
+	});
+
 		/*usamos sheet propio:*/
-	//	Q.sheet("mario","mario_small.png", { tilew: 32, tileh: 32 });
+		//Q.sheet("mario_small","mario_small.png", { tilew: 32, tileh: 32 });
 		Q.sheet("princess","princess.png", { tilew: 32, tileh: 32 });
-		Q.stageScene("level1");
+		Q.stageScene("tittle");
 
 	});
 
