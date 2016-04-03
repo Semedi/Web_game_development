@@ -1,12 +1,14 @@
 window.addEventListener("load",function() {
+
 	/*
 	Maximize this game to whatever the size of the browser is
 	turn on default input controls and touch input (for UI)
 	*/
 	var Q  = Quintus().include("Sprites, Scenes, Input, 2D, Anim, Touch, UI, TMX").setup({
-		width: 320, // Set the default width to 800 pixels
+		width: 600, // Set the default width to 800 pixels
 		height: 480, // Set the default height to 600 pixels
 	}).controls().touch();
+
 
 
 	Q.SPRITE_PLAYER = 1;
@@ -131,11 +133,14 @@ Q.component("defaultEnemy", {
 			} //procesado de animaciones
 
 
+			if (this.p.x >= 1800 && this.p.y >= 600)
+				console.log("easter egg");
 
-			if(this.p.y > 600){
+			if(this.p.y > 600 && this.p.x < 2000){
 				Q.stageScene("endGame",1, { label: "Game over" });
 				this.destroy();
 			}
+
 		},
 
 		enemyHit: function(data) {
@@ -170,9 +175,10 @@ Q.component("defaultEnemy", {
 
 		},
 
-		sensor: function() {
+		sensor: function(col) {
 
     	Q.stageScene("endGame",1, { label: "You won!" });
+			col.stage.unfollow();
 
     },
 
