@@ -7,7 +7,7 @@
   <image source="../images/goomba.png" width="128" height="96"/>
  </tileset>
  <imagelayer name="background">
-  <image source="../images/bg.png" width="800" height="600"/>
+  <image source="../images/fondo800.jpg" width="800" height="600"/>
  </imagelayer>
  <layer name="Collision" width="60" height="18">
   <properties>
@@ -1096,5 +1096,4 @@
    <tile gid="15"/>
   </data>
  </layer>
- <objectgroup name="Capa de Objetos 1"/>
 </map>

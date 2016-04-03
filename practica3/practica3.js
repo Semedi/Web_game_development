@@ -133,8 +133,13 @@ Q.component("defaultEnemy", {
 			} //procesado de animaciones
 
 
-			if (this.p.x >= 1800 && this.p.y >= 600)
-				console.log("easter egg");
+			if (this.p.x >= 1800 && this.p.y >= 600){
+				Q.clearStages();
+				Q.stageScene("level2");
+				Q.stageScene('hud', 3);
+
+			}
+
 
 			if(this.p.y > 600 && this.p.x < 2000){
 				Q.stageScene("endGame",1, { label: "Game over" });
@@ -232,9 +237,7 @@ Q.component("defaultEnemy", {
 		init: function(p){
 			this._super(p, {
 				sheet: "goomba",
-				sprite: "goomba",
-				x: 1500,
-				y: 380
+				sprite: "goomba"
 			});
 
 		}
@@ -356,7 +359,7 @@ Q.component("defaultEnemy", {
 		var player = stage.insert(new Q.Player());
 
 		stage.insert(new Q.Bloopa());
-		stage.insert(new Q.Goomba());
+		stage.insert(new Q.Goomba({x: 1500, y: 380}));
 
 		stage.insert(new Q.Princess());
 		stage.insert(new Q.Coin({y: 500}));
@@ -367,6 +370,16 @@ Q.component("defaultEnemy", {
 		stage.viewport.offsetX = -100;
 		stage.viewport.offsetY = 150;
 
+	});
+
+	Q.scene("level2",function(stage) {
+	  Q.stageTMX("level2.tmx",stage);
+
+		var player = stage.insert(new Q.Player());
+
+	  stage.add("viewport").follow(player);
+		stage.viewport.offsetX = -100;
+		stage.viewport.offsetY = 150;
 	});
 
 
@@ -400,8 +413,8 @@ Q.component("defaultEnemy", {
 									x: Q.width/2
 								}, function() {
 										Q.clearStages();
-										Q.stageScene("level1");
-										Q.stageScene('hud', 3, Q('Player').first().p);
+										Q.stageScene("level2");
+										Q.stageScene('hud', 3);
 								}, { keyActionName: 'confirm' }));
 
 
@@ -463,7 +476,7 @@ Q.component("defaultEnemy", {
 
 /* METODO DE CARGA DE RECUROS */
 /*******************************************************************/
-	Q.loadTMX("level.tmx, mainTitle.png, princess.png, mario_small.png, goomba.png, bloopa.png, coin.png, mario_small.json, goomba.json, bloopa.json, coin.json", function(){
+	Q.loadTMX("level.tmx, level2.tmx, mainTitle.png, princess.png, mario_small.png, goomba.png, bloopa.png, coin.png, mario_small.json, goomba.json, bloopa.json, coin.json", function(){
 
 	 // this will create the sprite sheets snail, slime and fly
 		Q.compileSheets("mario_small.png","mario_small.json");
