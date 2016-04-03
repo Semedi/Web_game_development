@@ -66,7 +66,6 @@ Q.component("defaultEnemy", {
 				speed: 160,
 				x: 150,
 				y: 380,
-				score: 0,
 				type: Q.SPRITE_PLAYER,
 				collisionMask: Q.SPRITE_DEFAULT | Q.SPRITE_COLLECTABLE
 			});
@@ -305,8 +304,8 @@ Q.component("defaultEnemy", {
 	  sensor: function(colObj) {
 	    // Increment the score.
 	    if (this.p.amount) {
-	      colObj.p.score += this.p.amount;
-	      Q.stageScene('hud', 3, colObj.p);
+
+				Q.state.inc("score", this.p.amount);
 	    }
 	    //Q.audio.play('coin.mp3');
 	    this.destroy();
@@ -344,7 +343,10 @@ Q.component("defaultEnemy", {
 /*ESCENAS*/
 /**********************************************************/
 	Q.scene("level1",function(stage) {
+
 		Q.stageTMX("level.tmx",stage);
+
+		Q.state.reset({ score: 0});
 		var player = stage.insert(new Q.Player());
 
 		stage.insert(new Q.Bloopa());
@@ -352,6 +354,7 @@ Q.component("defaultEnemy", {
 
 		stage.insert(new Q.Princess());
 		stage.insert(new Q.Coin({y: 500}));
+		stage.insert(new Q.Coin({y: 450}));
 
 
 		stage.add("viewport").follow(player);
@@ -409,14 +412,32 @@ Q.component("defaultEnemy", {
 	});
 
 
+
+
+	Q.UI.Text.extend("Score",{
+		init: function(p) {
+			this._super({
+				color: "red",
+				label: "score: 0",
+				x: 150,
+				y: 40
+			});
+
+			Q.state.on("change.score",this,"score");
+		},
+		score: function(score) {
+			this.p.label = "score: " + score;
+		}
+	});
+
+
 	Q.scene('hud',function(stage) {
 
 	  var container = stage.insert(new Q.UI.Container({
 	    x: 50, y: 0
 	  }));
 
-	  var label = container.insert(new Q.UI.Text({x:200, y: 20,
-	    label: "Score: " + stage.options.score, color: "black" }));
+	  var label = container.insert(new Q.Score());
 
 	  container.fit(20);
 
