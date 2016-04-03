@@ -36,14 +36,18 @@ Q.component("defaultEnemy", {
 			}
 		});
 
-		this.entity.on("bump.left,bump.right,bump.bottom",function(collision) {
-			if(collision.obj.isA("Player")) {
-				Q.stageScene("endGame",1, { label: "Game over" });
-				collision.obj.destroy();
+
+		this.entity.on("hit.sprite", function(col){
+
+			if(col.obj.isA("Player") && !col.obj.p.immune && !this.p.dead) {
+				col.obj.trigger('enemy.hit', {"enemy":self.entity,"col":col});
+				//Q.audio.play('hit.mp3');
 			}
+
 		});
 
-	}
+	} //added
+
 });
 
 /***************************************************************************************************/
@@ -61,7 +65,10 @@ Q.component("defaultEnemy", {
 				direction:"right",
 				speed: 160,
 				x: 150,
-				y: 380
+				y: 380,
+				score: 0,
+				type: Q.SPRITE_PLAYER,
+				collisionMask: Q.SPRITE_DEFAULT | Q.SPRITE_COLLECTABLE
 			});
 			// Add in pre-made components to get up and running quickly
 			// The `2d` component adds in default 2d collision detection
@@ -72,12 +79,28 @@ Q.component("defaultEnemy", {
 			// letting them jump.
 			this.add('2d, platformerControls, animation');
 
+			this.on("enemy.hit","enemyHit");
+
 		},
 
 		step: function(dt) {
 			var processed = false;
 
+
+
+
+			if (this.p.dead){
+				this.play('die');
+				this.p.y += this.p.vy * dt;
+
+				processed = true;
+			}
+
+
+
+ /* CASO NORMAL: */
 			if(!processed){
+				/* Vamos hacia la derecha*/
 				if(this.p.vx > 0) {
 
 					if(this.p.landed > 0) {
@@ -90,6 +113,7 @@ Q.component("defaultEnemy", {
 					/*turning direction right*/
 					this.p.direction = "right";
 			 	}
+				/* Vamos hacia la izquierda*/
 				else if(this.p.vx < 0) {
 
 					if(this.p.landed > 0) {
@@ -102,12 +126,12 @@ Q.component("defaultEnemy", {
 					/*turning direction left*/
 					this.p.direction = "left";
 	 	 		}
+				/* Standing*/
 				else // vx = 0
 					this.play("stand_" + this.p.direction);
+			} //procesado de animaciones
 
 
-
-			}
 
 			if(this.p.y > 600){
 				Q.stageScene("endGame",1, { label: "Game over" });
@@ -115,7 +139,21 @@ Q.component("defaultEnemy", {
 			}
 		},
 
-	});
+		enemyHit: function(data) {
+
+	    var col = data.col;
+	    var enemy = data.enemy;
+
+			this.p.dead = true;
+
+			this.del('2d, platformerControls');
+			this.p.vy = 200;
+			this.stage.unfollow();
+			Q.stageScene("endGame",1, { label: "Game over" });
+
+  	}
+
+	}); //PLAYER
 
 
 	Q.Sprite.extend("Princess",{
@@ -155,6 +193,7 @@ Q.component("defaultEnemy", {
 	    this.add('2d, aiBounce, animation, defaultEnemy');
 	  },
 
+
 	  step: function(dt) {
 
 			var p = this.p;
@@ -181,6 +220,7 @@ Q.component("defaultEnemy", {
 	  }
 
 	});
+
 
 
 	Q.Enemy.extend("Goomba",{
@@ -246,6 +286,60 @@ Q.component("defaultEnemy", {
 	});
 
 
+	Q.Sprite.extend("Collectable", {
+	  init: function(p, defaults) {
+	    this._super(p, Q._defaults(defaults||{},{
+	      type: Q.SPRITE_COLLECTABLE,
+	      collisionMask: Q.SPRITE_PLAYER,
+	      sensor: true,
+	      vx: 0,
+	      vy: 0,
+	      gravity: 0
+	    }));
+
+	    this.add("animation");
+	    this.on("sensor");
+	  },
+
+	  // When a Collectable is hit.
+	  sensor: function(colObj) {
+	    // Increment the score.
+	    if (this.p.amount) {
+	      colObj.p.score += this.p.amount;
+	      Q.stageScene('hud', 3, colObj.p);
+	    }
+	    //Q.audio.play('coin.mp3');
+	    this.destroy();
+	  },
+
+		step: function(dt) {
+			this.play('main_anim');
+		}
+
+	}); //Collectable
+
+
+
+
+	Q.Collectable.extend("Coin",{
+		init: function(p){
+			this._super(p, {
+				sheet: "coin",
+				sprite: "coin",
+				x: 300,
+				y: 500,
+				amount: 1
+			});
+
+		}
+	});
+
+
+
+
+
+
+
 
 /*ESCENAS*/
 /**********************************************************/
@@ -257,6 +351,8 @@ Q.component("defaultEnemy", {
 		stage.insert(new Q.Goomba());
 
 		stage.insert(new Q.Princess());
+		stage.insert(new Q.Coin({y: 500}));
+
 
 		stage.add("viewport").follow(player);
 		stage.viewport.offsetX = -100;
@@ -266,6 +362,7 @@ Q.component("defaultEnemy", {
 
 
 	Q.scene('endGame',function(stage) {
+
 	  var box = stage.insert(new Q.UI.Container({
 	    x: Q.width/2, y: Q.height/2, fill: "rgba(0,0,0,0.5)"
 	  }));
@@ -282,7 +379,9 @@ Q.component("defaultEnemy", {
 	    Q.stageScene('tittle');
 	  });
 	  box.fit(20);
-});
+	});
+
+
 
 	Q.scene('tittle', function(stage){
 
@@ -293,6 +392,7 @@ Q.component("defaultEnemy", {
 								}, function() {
 										Q.clearStages();
 										Q.stageScene("level1");
+										Q.stageScene('hud', 3, Q('Player').first().p);
 								}, { keyActionName: 'confirm' }));
 
 
@@ -305,6 +405,20 @@ Q.component("defaultEnemy", {
 		container.fit(20);
 
 
+
+	});
+
+
+	Q.scene('hud',function(stage) {
+
+	  var container = stage.insert(new Q.UI.Container({
+	    x: 50, y: 0
+	  }));
+
+	  var label = container.insert(new Q.UI.Text({x:200, y: 20,
+	    label: "Score: " + stage.options.score, color: "black" }));
+
+	  container.fit(20);
 
 	});
 
@@ -322,12 +436,13 @@ Q.component("defaultEnemy", {
 
 /* METODO DE CARGA DE RECUROS */
 /*******************************************************************/
-	Q.loadTMX("level.tmx, mainTitle.png,  princess.png, mario_small.png, goomba.png, bloopa.png ,mario_small.json, goomba.json, bloopa.json", function(){
+	Q.loadTMX("level.tmx, mainTitle.png, princess.png, mario_small.png, goomba.png, bloopa.png, coin.png, mario_small.json, goomba.json, bloopa.json, coin.json", function(){
 
 	 // this will create the sprite sheets snail, slime and fly
 		Q.compileSheets("mario_small.png","mario_small.json");
 		Q.compileSheets("goomba.png","goomba.json");
 		Q.compileSheets("bloopa.png","bloopa.json");
+		Q.compileSheets("coin.png", "coin.json");
 
 		Q.animations("mario_small", {
 			walk_right: { frames: [0,1,2], rate: 1/5, flip: false, loop: true },
@@ -338,17 +453,21 @@ Q.component("defaultEnemy", {
 			stand_left: { frames: [0], rate: 1/9, flip:"x" },
 			duck_right: { frames: [6], rate: 1/9, flip: false },
 			duck_left: { frames:  [6], rate: 1/9, flip: "x" },
-			die: { frames:  [12], rate: 1/9, flip: false }
+			die: { frames:  [12], flip: false }
 		});
 
 		Q.animations("bloopa", {
 			jump: { frames: [0,1], rate: 1/2, loop: true },
-			dead: { frames: [2], rate: 1/8 }
+			dead: { frames: [2]}
 		});
 
 		Q.animations("goomba", {
 			walk: { frames: [0,1], rate: 1/3, loop: true },
 			dead: { frames: [2], rate: 1/8 }
+		});
+
+		Q.animations("coin", {
+			main_anim: { frames: [0,1,2], rate: 1/3, loop: true }
 		});
 
 
