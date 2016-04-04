@@ -1,0 +1,4 @@
+{
+	"bowserL":{"sx":0,"sy":1,"cols":4,"tilew":64,"tileh":64,"frames":4},
+	"bowserR":{"sx":0,"sy":66,"cols":4,"tilew":64,"tileh":64,"frames":4}
+}

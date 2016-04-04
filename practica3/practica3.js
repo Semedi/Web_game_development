@@ -160,7 +160,13 @@ Q.component("defaultEnemy", {
 			this.stage.unfollow();
 			Q.stageScene("endGame",1, { label: "Game over" });
 
-  	}
+  	},
+
+		getCamera: function(){
+			this.stage.follow(this);
+			this.stage.viewport.offsetX = -200;
+			this.stage.viewport.offsetY = 100;
+		}
 
 	}); //PLAYER
 
@@ -241,6 +247,35 @@ Q.component("defaultEnemy", {
 			});
 
 		}
+	});
+
+	Q.Enemy.extend("Bowser",{
+		init: function(p){
+			this._super(p, {
+				sheet: "bowserR",
+				sprite: "bowser"
+			});
+
+		},
+
+		step: function(dt) {
+
+			var p = this.p;
+
+			if (p.vx > 0)
+				this.play('walk_righ');
+			else
+				this.play('walk_left');
+
+
+
+	    p.vx += p.ax * dt;
+	    p.vy += p.ay * dt;
+
+	    p.x += p.vx * dt;
+	    p.y += p.vy * dt;
+	  }
+
 	});
 
 
@@ -373,13 +408,17 @@ Q.component("defaultEnemy", {
 	});
 
 	Q.scene("level2",function(stage) {
+
 	  Q.stageTMX("level2.tmx",stage);
 
-		var player = stage.insert(new Q.Player());
+		var player = stage.insert(new Q.Player({y:-200}));
 
-	  stage.add("viewport").follow(player);
-		stage.viewport.offsetX = -100;
-		stage.viewport.offsetY = 150;
+		stage.add("viewport").centerOn(300,300);
+
+		setTimeout(function(){
+			player.getCamera();
+		}, 2000);
+
 	});
 
 
@@ -413,7 +452,7 @@ Q.component("defaultEnemy", {
 									x: Q.width/2
 								}, function() {
 										Q.clearStages();
-										Q.stageScene("level2");
+										Q.stageScene("level1");
 										Q.stageScene('hud', 3);
 								}, { keyActionName: 'confirm' }));
 
@@ -465,7 +504,11 @@ Q.component("defaultEnemy", {
 
 
 
+/*
+DUDA: pasar de spritesheet a JSON mas facil, spriter necesita estar descompuesto
+Aprovechar el sheet del JSON de verdad
 
+*/
 
 
 
@@ -476,13 +519,21 @@ Q.component("defaultEnemy", {
 
 /* METODO DE CARGA DE RECUROS */
 /*******************************************************************/
-	Q.loadTMX("level.tmx, level2.tmx, mainTitle.png, princess.png, mario_small.png, goomba.png, bloopa.png, coin.png, mario_small.json, goomba.json, bloopa.json, coin.json", function(){
+	Q.loadTMX("level.tmx, level2.tmx, mainTitle.png, princess.png, mario_small.png, goomba.png, bloopa.png, coin.png, bowser.png, mario_small.json, goomba.json, bloopa.json, coin.json, bowser.json", function(){
 
 	 // this will create the sprite sheets snail, slime and fly
 		Q.compileSheets("mario_small.png","mario_small.json");
 		Q.compileSheets("goomba.png","goomba.json");
 		Q.compileSheets("bloopa.png","bloopa.json");
 		Q.compileSheets("coin.png", "coin.json");
+		Q.compileSheets("bowser.png", "bowser.json");
+
+		Q.animations("bowser", {
+			walk_right: { frames: [0,1,2,3], rate: 1/5, flip: false, loop: true },
+			walk_left: { frames:  [0,1,2,3], rate: 1/5, flip:"x", loop: true },
+			stand_right: { frames:[0], rate: 1/9, flip: false },
+			stand_left: { frames: [0], rate: 1/9, flip:"x" }
+		});
 
 		Q.animations("mario_small", {
 			walk_right: { frames: [0,1,2], rate: 1/5, flip: false, loop: true },
