@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="16" tilewidth="36" tileheight="36">
- <tileset firstgid="1" name="tiles" tilewidth="34" tileheight="34">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="16" tilewidth="36" tileheight="36" nextobjectid="20">
+ <tileset firstgid="1" name="tiles" tilewidth="34" tileheight="34" tilecount="49" columns="7">
   <image source="../images/tiles.png" width="256" height="256"/>
  </tileset>
- <tileset firstgid="50" name="goomba" tilewidth="32" tileheight="32">
+ <tileset firstgid="50" name="goomba" tilewidth="32" tileheight="32" tilecount="12" columns="4">
   <image source="../images/goomba.png" width="128" height="96"/>
   <tile id="0">
    <properties>
@@ -11,7 +11,7 @@
    </properties>
   </tile>
  </tileset>
- <tileset firstgid="62" name="bowser" tilewidth="64" tileheight="64">
+ <tileset firstgid="62" name="bowser" tilewidth="64" tileheight="64" tilecount="8" columns="4">
   <image source="../images/bowser.png" width="256" height="130"/>
   <tile id="0">
    <properties>
@@ -19,8 +19,16 @@
    </properties>
   </tile>
  </tileset>
+ <tileset firstgid="70" name="canyon" tilewidth="36" tileheight="64" tilecount="1" columns="1">
+  <image source="../images/canyon.png" width="64" height="65"/>
+  <tile id="0">
+   <properties>
+    <property name="Class" value="Canyon"/>
+   </properties>
+  </tile>
+ </tileset>
  <imagelayer name="background">
-  <image source="../images/smb4a.gif"/>
+  <image source="../images/smb4a.gif" width="1024" height="864"/>
  </imagelayer>
  <layer name="collision" width="100" height="16">
   <properties>
@@ -1273,7 +1281,7 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-   <tile gid="15"/>
+   <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -1630,12 +1638,16 @@
   </data>
  </layer>
  <objectgroup name="Sprites">
-  <object gid="50" x="1079" y="498"/>
-  <object gid="50" x="1232" y="499"/>
-  <object gid="50" x="1333" y="496"/>
-  <object gid="50" x="1418" y="497"/>
-  <object gid="50" x="1470" y="497"/>
-  <object gid="50" x="1589" y="500"/>
-  <object gid="62" x="1152" y="498"/>
+  <object id="1" gid="50" x="1079" y="498" width="32" height="32"/>
+  <object id="2" gid="50" x="1232" y="499" width="32" height="32"/>
+  <object id="3" gid="50" x="1333" y="496" width="32" height="32"/>
+  <object id="4" gid="50" x="1418" y="497" width="32" height="32"/>
+  <object id="5" gid="50" x="1470" y="497" width="32" height="32"/>
+  <object id="6" gid="50" x="1512" y="495" width="32" height="32"/>
+  <object id="7" gid="62" x="1152" y="498" width="64" height="64"/>
+  <object id="10" gid="50" x="1017" y="495" width="32" height="32"/>
+  <object id="12" gid="50" x="1116" y="504" width="32" height="32"/>
+  <object id="14" gid="50" x="1278" y="495" width="32" height="32"/>
+  <object id="17" gid="70" x="1625" y="477" width="36" height="64"/>
  </objectgroup>
 </map>

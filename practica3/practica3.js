@@ -41,7 +41,7 @@ Q.component("defaultEnemy", {
 
 		this.entity.on("hit.sprite", function(col){
 
-			if(col.obj.isA("Player") && !col.obj.p.immune && !this.p.dead) {
+			if(col.obj.isA("Player") &&  !self.entity.p.dead) {
 				col.obj.trigger('enemy.hit', {"enemy":self.entity,"col":col});
 				//Q.audio.play('hit.mp3');
 			}
@@ -95,6 +95,15 @@ Q.component("defaultEnemy", {
 				this.p.y += this.p.vy * dt;
 
 				processed = true;
+			}
+
+			if (this.p.canyon){
+
+				if(Q.inputs['down']) {
+					this.p.canyon.shoot();
+
+       	}
+
 			}
 
 
@@ -194,6 +203,36 @@ Q.component("defaultEnemy", {
     },
 
 	});
+
+
+	Q.Sprite.extend("Canyon",{
+		init: function(p) {
+			this._super(p, {
+				sheet: "canyon", // Setting a sprite sheet sets sprite width and height
+				sprite: "canyon",
+				vx: 0,
+				vy: 0,
+				sensor: true
+			});
+
+			this.add("animation");
+			this.on("sensor");
+
+		},
+
+		sensor: function(col) {
+
+    	col.p.canyon = this;
+
+    },
+
+		shoot: function(){
+			this.play("on");
+			console.log("disparo!");
+		}
+
+	});
+
 
 
 	Q.Sprite.extend("Enemy", {
@@ -452,7 +491,7 @@ Q.component("defaultEnemy", {
 									x: Q.width/2
 								}, function() {
 										Q.clearStages();
-										Q.stageScene("level1");
+										Q.stageScene("level2");
 										Q.stageScene('hud', 3);
 								}, { keyActionName: 'confirm' }));
 
@@ -503,10 +542,14 @@ Q.component("defaultEnemy", {
 
 
 
-
+//DUDAS
 /*
-DUDA: pasar de spritesheet a JSON mas facil, spriter necesita estar descompuesto
-Aprovechar el sheet del JSON de verdad
+pasar de spritesheet a JSON mas facil, spriter necesita estar descompuesto en distintas imagenes
+Aprovechar el sheet del JSON de verdad para las animaciones
+
+tiled: objeto de mas de un tile
+
+Activar el LoadTMX cuando quiera
 
 */
 
@@ -519,7 +562,7 @@ Aprovechar el sheet del JSON de verdad
 
 /* METODO DE CARGA DE RECUROS */
 /*******************************************************************/
-	Q.loadTMX("level.tmx, level2.tmx, mainTitle.png, princess.png, mario_small.png, goomba.png, bloopa.png, coin.png, bowser.png, mario_small.json, goomba.json, bloopa.json, coin.json, bowser.json", function(){
+	Q.loadTMX("level.tmx, level2.tmx, mainTitle.png, princess.png, mario_small.png, goomba.png, bloopa.png, coin.png, bowser.png, canyon.png , mario_small.json, goomba.json, bloopa.json, coin.json, bowser.json, canyon.json", function(){
 
 	 // this will create the sprite sheets snail, slime and fly
 		Q.compileSheets("mario_small.png","mario_small.json");
@@ -527,6 +570,7 @@ Aprovechar el sheet del JSON de verdad
 		Q.compileSheets("bloopa.png","bloopa.json");
 		Q.compileSheets("coin.png", "coin.json");
 		Q.compileSheets("bowser.png", "bowser.json");
+		Q.compileSheets("canyon.png", "canyon.json");
 
 		Q.animations("bowser", {
 			walk_right: { frames: [0,1,2,3], rate: 1/5, flip: false, loop: true },
@@ -551,6 +595,14 @@ Aprovechar el sheet del JSON de verdad
 			jump: { frames: [0,1], rate: 1/2, loop: true },
 			dead: { frames: [2]}
 		});
+
+		Q.animations("canyon", {
+			off: {frames:[0]},
+			on: {frames: [1]}
+		});
+
+
+
 
 		Q.animations("goomba", {
 			walk: { frames: [0,1], rate: 1/3, loop: true },
