@@ -263,7 +263,7 @@ Q.component("defaultEnemy", {
 			var p = this.p;
 
 			if (p.vx > 0)
-				this.play('walk_righ');
+				this.play('walk_right');
 			else
 				this.play('walk_left');
 
