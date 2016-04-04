@@ -1,3 +1,4 @@
 {
-  "canyon":{"sx":0,"sy":1,"cols":2,"tilew":32,"tileh":64,"frames":2}
+  "canyon_off":{"sx":0,"sy":0,"cols":1,"tilew":32,"tileh":64,"frames":1},
+  "canyon_on":{"sx":32,"sy":0,"cols":1,"tilew":32,"tileh":64,"frames":1}
 }

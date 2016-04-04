@@ -208,8 +208,7 @@ Q.component("defaultEnemy", {
 	Q.Sprite.extend("Canyon",{
 		init: function(p) {
 			this._super(p, {
-				sheet: "canyon", // Setting a sprite sheet sets sprite width and height
-				sprite: "canyon",
+				sheet: "canyon_off", // Setting a sprite sheet sets sprite width and height
 				vx: 0,
 				vy: 0,
 				sensor: true
@@ -227,7 +226,7 @@ Q.component("defaultEnemy", {
     },
 
 		shoot: function(){
-			this.play("on");
+			this.p.sheet="canyon_on";
 			console.log("disparo!");
 		}
 
@@ -594,11 +593,6 @@ Activar el LoadTMX cuando quiera
 		Q.animations("bloopa", {
 			jump: { frames: [0,1], rate: 1/2, loop: true },
 			dead: { frames: [2]}
-		});
-
-		Q.animations("canyon", {
-			off: {frames:[0]},
-			on: {frames: [1]}
 		});
 
 
