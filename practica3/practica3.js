@@ -31,7 +31,7 @@ Q.component("defaultEnemy", {
 
 			if(collision.obj.isA("Player")){
 
-				collision.obj.p.vy = -300;
+				collision.obj.p.vy = -350;
 				self.entity.play('dead');
 				self.entity.p.dead = true;
 				self.entity.p.deadTimer = 0;
@@ -248,7 +248,7 @@ Q.component("defaultEnemy", {
 			});
 
 
-			this.add("2d");
+			this.add("2d, animation");
 			this.on("sensor");
 		},
 
@@ -258,11 +258,16 @@ Q.component("defaultEnemy", {
 			this.p.frame=0;
 			this.p.sprite="explosion";
 			this.p.sheet="explosion";
-			//col.p.canyon = this;
+			this.play("explosion_anim");
+			this.destroy();
 
 		},
 
 		step: function(dt){
+
+
+
+
 			var p = this.p;
 
 			p.vx += p.ax * dt;
@@ -603,7 +608,7 @@ Activar el LoadTMX cuando quiera
 /* METODO DE CARGA DE RECUROS */
 /*******************************************************************/
 	Q.loadTMX("level.tmx, level2.tmx,"+
-	 					"mainTitle.png, princess.png, mario_small.png, goomba.png, bloopa.png, coin.png, bowser.png, canyon.png, bullets.png, explosion.png,"+
+	 					"mainTitle.png, princess.png, mario_small.png, goomba.png, bloopa.png, coin.png, bowser.png, canyon.png, bullets.png, explosion.png, random.png,"+
 						"mario_small.json, goomba.json, bloopa.json, coin.json, bowser.json, canyon.json, bullets.json, explosion.json", function(){
 					 // this will create the sprite sheets snail, slime and fly
 						Q.compileSheets("mario_small.png","mario_small.json");
