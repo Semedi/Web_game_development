@@ -211,7 +211,8 @@ Q.component("defaultEnemy", {
 				sheet: "canyon_off", // Setting a sprite sheet sets sprite width and height
 				vx: 0,
 				vy: 0,
-				sensor: true
+				sensor: true,
+				ready: true
 			});
 
 			this.add("animation");
@@ -226,10 +227,50 @@ Q.component("defaultEnemy", {
     },
 
 		shoot: function(){
-			this.p.sheet="canyon_on";
-			console.log("disparo!");
+			if (this.p.ready){
+				this.p.sheet="canyon_on";
+				this.stage.insert(new Q.Bullet({x: this.p.x, y: this.p.y-20}));
+				this.p.ready = false;
+			}
 		}
 
+	});
+
+	Q.Sprite.extend("Bullet",{
+		init: function(p){
+
+			this._super(p, {
+				sheet:"bulletL",
+				vx: -65,
+				vy: 0,
+				sensor: true,
+				gravity: 0
+			});
+
+
+			this.add("2d");
+			this.on("sensor");
+		},
+
+		sensor: function(col) {
+
+			console.log("explosion");
+			this.p.frame=0;
+			this.p.sprite="explosion";
+			this.p.sheet="explosion";
+			//col.p.canyon = this;
+
+		},
+
+		step: function(dt){
+			var p = this.p;
+
+			p.vx += p.ax * dt;
+			p.vy += p.ay * dt;
+
+			p.x += p.vx * dt;
+			p.y += p.vy * dt;
+		}
 	});
 
 
@@ -561,60 +602,67 @@ Activar el LoadTMX cuando quiera
 
 /* METODO DE CARGA DE RECUROS */
 /*******************************************************************/
-	Q.loadTMX("level.tmx, level2.tmx, mainTitle.png, princess.png, mario_small.png, goomba.png, bloopa.png, coin.png, bowser.png, canyon.png , mario_small.json, goomba.json, bloopa.json, coin.json, bowser.json, canyon.json", function(){
+	Q.loadTMX("level.tmx, level2.tmx,"+
+	 					"mainTitle.png, princess.png, mario_small.png, goomba.png, bloopa.png, coin.png, bowser.png, canyon.png, bullets.png, explosion.png,"+
+						"mario_small.json, goomba.json, bloopa.json, coin.json, bowser.json, canyon.json, bullets.json, explosion.json", function(){
+					 // this will create the sprite sheets snail, slime and fly
+						Q.compileSheets("mario_small.png","mario_small.json");
+						Q.compileSheets("goomba.png","goomba.json");
+						Q.compileSheets("bloopa.png","bloopa.json");
+						Q.compileSheets("coin.png", "coin.json");
+						Q.compileSheets("bowser.png", "bowser.json");
+						Q.compileSheets("canyon.png", "canyon.json");
+						Q.compileSheets("bullets.png", "bullets.json");
+						Q.compileSheets("explosion.png", "explosion.json");
 
-	 // this will create the sprite sheets snail, slime and fly
-		Q.compileSheets("mario_small.png","mario_small.json");
-		Q.compileSheets("goomba.png","goomba.json");
-		Q.compileSheets("bloopa.png","bloopa.json");
-		Q.compileSheets("coin.png", "coin.json");
-		Q.compileSheets("bowser.png", "bowser.json");
-		Q.compileSheets("canyon.png", "canyon.json");
+						Q.animations("explosion", {
+							explosion_anim: { frames: [0,1,2,3,4,5,6,7,8,9,10,11], rate: 1/10 }
+						});
 
-		Q.animations("bowser", {
-			walk_right: { frames: [0,1,2,3], rate: 1/5, flip: false, loop: true },
-			walk_left: { frames:  [0,1,2,3], rate: 1/5, flip:"x", loop: true },
-			stand_right: { frames:[0], rate: 1/9, flip: false },
-			stand_left: { frames: [0], rate: 1/9, flip:"x" }
-		});
+						Q.animations("bowser", {
+							walk_right: { frames: [0,1,2,3], rate: 1/5, flip: false, loop: true },
+							walk_left: { frames:  [0,1,2,3], rate: 1/5, flip:"x", loop: true },
+							stand_right: { frames:[0], rate: 1/9, flip: false },
+							stand_left: { frames: [0], rate: 1/9, flip:"x" }
+						});
 
-		Q.animations("mario_small", {
-			walk_right: { frames: [0,1,2], rate: 1/5, flip: false, loop: true },
-			walk_left: { frames:  [0,1,2], rate: 1/5, flip:"x", loop: true },
-			jump_right: { frames: [4], rate: 1/9, flip: false },
-			jump_left: { frames:  [4], rate: 1/9, flip: "x" },
-			stand_right: { frames:[0], rate: 1/9, flip: false },
-			stand_left: { frames: [0], rate: 1/9, flip:"x" },
-			duck_right: { frames: [6], rate: 1/9, flip: false },
-			duck_left: { frames:  [6], rate: 1/9, flip: "x" },
-			die: { frames:  [12], flip: false }
-		});
+						Q.animations("mario_small", {
+							walk_right: { frames: [0,1,2], rate: 1/5, flip: false, loop: true },
+							walk_left: { frames:  [0,1,2], rate: 1/5, flip:"x", loop: true },
+							jump_right: { frames: [4], rate: 1/9, flip: false },
+							jump_left: { frames:  [4], rate: 1/9, flip: "x" },
+							stand_right: { frames:[0], rate: 1/9, flip: false },
+							stand_left: { frames: [0], rate: 1/9, flip:"x" },
+							duck_right: { frames: [6], rate: 1/9, flip: false },
+							duck_left: { frames:  [6], rate: 1/9, flip: "x" },
+							die: { frames:  [12], flip: false }
+						});
 
-		Q.animations("bloopa", {
-			jump: { frames: [0,1], rate: 1/2, loop: true },
-			dead: { frames: [2]}
-		});
-
-
-
-
-		Q.animations("goomba", {
-			walk: { frames: [0,1], rate: 1/3, loop: true },
-			dead: { frames: [2], rate: 1/8 }
-		});
-
-		Q.animations("coin", {
-			main_anim: { frames: [0,1,2], rate: 1/3, loop: true }
-		});
+						Q.animations("bloopa", {
+							jump: { frames: [0,1], rate: 1/2, loop: true },
+							dead: { frames: [2]}
+						});
 
 
 
-		/*usamos sheet propio:*/
-		//Q.sheet("mario_small","mario_small.png", { tilew: 32, tileh: 32 });
-		Q.sheet("princess","princess.png", { tilew: 32, tileh: 32 });
-		Q.stageScene("tittle");
 
-	});
+						Q.animations("goomba", {
+							walk: { frames: [0,1], rate: 1/3, loop: true },
+							dead: { frames: [2], rate: 1/8 }
+						});
+
+						Q.animations("coin", {
+							main_anim: { frames: [0,1,2], rate: 1/3, loop: true }
+						});
+
+
+
+						/*usamos sheet propio:*/
+						//Q.sheet("mario_small","mario_small.png", { tilew: 32, tileh: 32 });
+						Q.sheet("princess","princess.png", { tilew: 32, tileh: 32 });
+						Q.stageScene("tittle");
+
+					});
 
 /********************************************************************/
 
