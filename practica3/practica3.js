@@ -272,16 +272,21 @@ Q.component("defaultEnemy", {
 		step: function(dt){
 
 			var p = this.p;
+			var self = this;
 
+
+			/* la bala explota*/
 			if (p.explosion){
 				this.p.deadTimer++;
+
 				if (this.p.deadTimer > 24) {
-					// Dead for 24 frames, remove it.
-					this.stage.follow(Q("Player").first());
+					setTimeout(function(){
+						self.stage.follow(Q("Player").first());
+					}, 2000);
+
 					this.destroy();
 				}
 				return;
-
 			}
 
 			p.vx += p.ax * dt;
@@ -514,7 +519,7 @@ Q.component("defaultEnemy", {
 
 	  Q.stageTMX("level2.tmx",stage);
 
-		var player = stage.insert(new Q.Player({y:-200, x:1500}));
+		var player = stage.insert(new Q.Player({y:-200}));
 
 		stage.add("viewport").centerOn(300,300);
 
@@ -555,7 +560,7 @@ Q.component("defaultEnemy", {
 									x: Q.width/2
 								}, function() {
 										Q.clearStages();
-										Q.stageScene("level2");
+										Q.stageScene("level1");
 										Q.stageScene('hud', 3);
 								}, { keyActionName: 'confirm' }));
 
@@ -608,7 +613,7 @@ Q.component("defaultEnemy", {
 
 //DUDAS
 /*
-pasar de spritesheet a JSON mas facil, spriter necesita estar descompuesto en distintas imagenes
+pasar de spritesheet a JSON mas facil, spriter necesita estar descompuesto en distintas imagen
 Aprovechar el sheet del JSON de verdad para las animaciones
 
 tiled: objeto de mas de un tile
