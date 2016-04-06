@@ -229,8 +229,9 @@ Q.component("defaultEnemy", {
 		shoot: function(){
 			if (this.p.ready){
 				this.p.sheet="canyon_on";
-				this.stage.insert(new Q.Bullet({x: this.p.x, y: this.p.y-20}));
+				var bala = this.stage.insert(new Q.Bullet({x: this.p.x, y: this.p.y-20}));
 				this.p.ready = false;
+				this.stage.follow(bala);
 			}
 		}
 
@@ -256,19 +257,32 @@ Q.component("defaultEnemy", {
 
 			console.log("explosion");
 			this.p.frame=0;
+
+			this.p.deadTimer=0;
+			this.p.explosion = true;
+
 			this.p.sprite="explosion";
 			this.p.sheet="explosion";
 			this.play("explosion_anim");
-			this.destroy();
+			col.destroy(col);
+
 
 		},
 
 		step: function(dt){
 
-
-
-
 			var p = this.p;
+
+			if (p.explosion){
+				this.p.deadTimer++;
+				if (this.p.deadTimer > 24) {
+					// Dead for 24 frames, remove it.
+					this.stage.follow(Q("Player").first());
+					this.destroy();
+				}
+				return;
+
+			}
 
 			p.vx += p.ax * dt;
 			p.vy += p.ay * dt;
@@ -338,6 +352,11 @@ Q.component("defaultEnemy", {
 			this._super(p, {
 				sheet: "bowserR",
 				sprite: "bowser"
+			});
+
+			this.off("bump.top");
+			this.on("bump.top", function(collision){
+				console.log("hola");
 			});
 
 		},
@@ -495,7 +514,7 @@ Q.component("defaultEnemy", {
 
 	  Q.stageTMX("level2.tmx",stage);
 
-		var player = stage.insert(new Q.Player({y:-200}));
+		var player = stage.insert(new Q.Player({y:-200, x:1500}));
 
 		stage.add("viewport").centerOn(300,300);
 
@@ -593,6 +612,7 @@ pasar de spritesheet a JSON mas facil, spriter necesita estar descompuesto en di
 Aprovechar el sheet del JSON de verdad para las animaciones
 
 tiled: objeto de mas de un tile
+borrar un comportamiento
 
 Activar el LoadTMX cuando quiera
 
