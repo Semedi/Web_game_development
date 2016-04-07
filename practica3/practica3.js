@@ -443,19 +443,25 @@ Q.component("defaultEnemy", {
 	      gravity: 0
 	    }));
 
-	    this.add("animation");
+	    this.add("animation, tween");
 	    this.on("sensor");
 	  },
 
 	  // When a Collectable is hit.
 	  sensor: function(colObj) {
 	    // Increment the score.
-	    if (this.p.amount) {
+	    if (this.p.amount  ) {
+				var self = this;
+				this.animate({x: this.p.x, y: this.p.y-100}, 0.2, Q.Easing.Linear,{delay:0, callback : function(){
+						Q.state.inc("score", self.p.amount);
+						self.destroy();
 
-				Q.state.inc("score", this.p.amount);
+
+				 }});
+				 console.log("das");
 	    }
 	    //Q.audio.play('coin.mp3');
-	    this.destroy();
+
 	  },
 
 		step: function(dt) {
@@ -555,7 +561,7 @@ Q.component("defaultEnemy", {
 									x: Q.width/2
 								}, function() {
 										Q.clearStages();
-										Q.stageScene("level2");
+										Q.stageScene("level1");
 										Q.stageScene('hud', 3);
 								}, { keyActionName: 'confirm' }));
 
