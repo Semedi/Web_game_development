@@ -515,9 +515,11 @@ Q.component("defaultEnemy", {
 		stage.insert(new Q.Coin({y: 450}));
 
 
-		stage.add("viewport").follow(player);
-		stage.viewport.offsetX = -100;
-		stage.viewport.offsetY = 150;
+
+		stage.add("viewport").follow(player, {x:true, y: false});
+
+		stage.viewport.centerOn(0,350);
+		stage.viewport.offsetX =-150;
 
 	});
 
@@ -527,11 +529,12 @@ Q.component("defaultEnemy", {
 
 		var player = stage.insert(new Q.Player({y:-200}));
 
-		stage.add("viewport").centerOn(300,300);
+		stage.add("viewport").follow(player, {x:true, y: false});
 
-		setTimeout(function(){
-			player.getCamera();
-		}, 2000);
+		stage.viewport.centerOn(0,300);
+		stage.viewport.offsetX =-150;
+
+
 
 	});
 
