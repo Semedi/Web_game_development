@@ -10,11 +10,13 @@ window.addEventListener("load",function() {
 	}).controls().touch();
 
 
+	Q.LEVEL = 0;
 
 	Q.SPRITE_PLAYER = 1;
 	Q.SPRITE_COLLECTABLE = 2;
 	Q.SPRITE_ENEMY = 4;
 	Q.SPRITE_DOOR = 8;
+	Q.SPRITE_SCENARIO =16;
 
 
 
@@ -81,12 +83,19 @@ Q.component("defaultEnemy", {
 			this.add('2d, platformerControls, animation');
 
 			this.on("enemy.hit","enemyHit");
+			this.on("landed", "onPlatform");
+
+			this.levelData = {
+				right:{},
+				left:{}
+			};
+
 
 		},
 
 		step: function(dt) {
 			var processed = false;
-
+			//console.log(this.p.x +"x "+this.p.y+"y");
 
 
 
@@ -107,7 +116,7 @@ Q.component("defaultEnemy", {
 			}
 
 
-
+	/* NORMAL BEHAVIOUR*********************************/
  /* CASO NORMAL: */
 			if(!processed){
 				/* Vamos hacia la derecha*/
@@ -142,14 +151,27 @@ Q.component("defaultEnemy", {
 			} //procesado de animaciones
 
 
-			if (this.p.x >= 1800 && this.p.y >= 600){
-				Q.clearStages();
-				Q.stageScene("level2");
-				Q.stageScene('hud', 3);
 
+			/************************************************************/
+			/* NEXT LEVELS (Checking both sides)*/
+			if (this.p.x >= this.levelData.right.exitX && this.p.y >= this.levelData.right.exitY ){
+
+				Q.clearStages();
+				Q.stageScene(this.levelData.right.name);
+				Q.stageScene('hud', 3);
+			}
+
+			if (this.p.x <= 115){
+				Q.clearStages();
+				Q.stageScene("level1");
+				Q.stageScene('hud', 3);
 			}
 
 
+
+
+
+			/* Reducir: */
 			if(this.p.y > 600 && this.p.x < 2000){
 				Q.stageScene("endGame",1, { label: "Game over" });
 				this.destroy();
@@ -170,6 +192,13 @@ Q.component("defaultEnemy", {
 			Q.stageScene("endGame",1, { label: "Game over" });
 
   	},
+
+		onPlatform: function(data) {
+
+			//this.p.vy= data.velocity;
+
+
+		},
 
 		getCamera: function(){
 			this.stage.follow(this);
@@ -196,6 +225,7 @@ Q.component("defaultEnemy", {
 		},
 
 		sensor: function(col) {
+
 
     	Q.stageScene("endGame",1, { label: "You won!" });
 			col.stage.unfollow();
@@ -341,6 +371,87 @@ Q.component("defaultEnemy", {
 	});
 
 
+	Q.Sprite.extend("Door", {
+		init: function(p) {
+			this._super(p,{
+				sheet: "door_closed",
+				type: Q.SPRITE_DOOR,
+				collisionMask: Q.SPRITE_NONE,
+				sensor: true,
+				open: false,
+				vx: 0,
+				vy: 0,
+				gravity: 0
+			});
+			this.add("animation");
+
+			this.on("sensor");
+		},
+		findLinkedDoor: function() {
+			return this.stage.find(this.p.link);
+		},
+		// When the player is in the door.
+		sensor: function(colObj) {
+			// Mark the door object on the player.
+			colObj.p.door = this;
+		}
+	});
+
+
+	Q.Sprite.extend("Scenario", {
+		init: function(p,defaults) {
+
+			this._super(p,Q._defaults(defaults||{},{
+				gravity: 0,
+				type: Q.SPRITE_SCENARIO,
+				collisionMask: Q.SPRITE_DEFAULT
+			}));
+
+			this.add('2d');
+
+
+			var self = this;
+			this.on("bump.top", function(col){
+
+				if(col.obj.isA("Player")) {
+					col.obj.trigger('landed', {"velocity":self.p.vy});
+				}
+
+			});
+		}
+	});
+
+	Q.Scenario.extend("Platform",{
+		init: function(p){
+			this._super(p, {
+				asset:"metalPlatformWire.png",
+				vy: 50,
+				vx: 0,
+			});
+
+			this.timeRange = 0;
+
+
+
+		},
+
+		step: function(dt){
+
+			var p = this.p;
+			this.timeRange+=dt;
+			if(p.vy == 0){
+				this.timeRange=0;
+				p.vy = -50;
+			}
+
+			if(this.timeRange >= 4)
+				p.vy = 50;
+
+
+		}
+	});
+
+
 
 	Q.Enemy.extend("Goomba",{
 		init: function(p){
@@ -360,10 +471,6 @@ Q.component("defaultEnemy", {
 			});
 
 			this.off("bump.top");
-			this.on("bump.top", function(collision){
-				console.log("hola");
-			});
-
 		},
 
 		step: function(dt) {
@@ -463,7 +570,7 @@ Q.component("defaultEnemy", {
 
 
 				 }});
-				 console.log("das");
+				 //console.log("das");
 	    }
 	    //Q.audio.play('coin.mp3');
 
@@ -502,15 +609,44 @@ Q.component("defaultEnemy", {
 /**********************************************************/
 	Q.scene("level1",function(stage) {
 
+
+
+		var player;
 		Q.stageTMX("level.tmx",stage);
 
-		Q.state.reset({ score: 0});
-		var player = stage.insert(new Q.Player());
+		stage.insert(new Q.Door({x:1120 ,y: 525 }));
+
+		if (Q.LEVEL == 0){
+			player = stage.insert(new Q.Player());
+			Q.state.reset({ score: 0});
+		} else {
+
+			player = stage.insert(new Q.Player({x:2050, y:400, vy: -300}));
+		}
+
+
+
+
+		//punto de salida de nivel
+		player.levelData = {
+			right: {
+				name : "level2",
+				exitY: 600,
+				exitX: 1800
+			},
+
+			left: {
+
+			}
+		};
+
 
 		stage.insert(new Q.Bloopa());
 		stage.insert(new Q.Goomba({x: 1500, y: 380}));
 
-		stage.insert(new Q.Princess());
+		if (Q.LEVEL === 0)
+			stage.insert(new Q.Princess());
+
 		stage.insert(new Q.Coin({y: 500}));
 		stage.insert(new Q.Coin({y: 450}));
 
@@ -521,13 +657,27 @@ Q.component("defaultEnemy", {
 		stage.viewport.centerOn(0,350);
 		stage.viewport.offsetX =-150;
 
+		Q.LEVEL = 1;
 	});
+
+
 
 	Q.scene("level2",function(stage) {
 
 	  Q.stageTMX("level2.tmx",stage);
 
 		var player = stage.insert(new Q.Player({y:-200}));
+
+
+		//puntos a considerar: 115x, 16y
+		player.levelData = {
+			left: {
+				exitX: 16,
+				exitY: 115,
+				name: "level1"
+			},
+			right:{}
+		};
 
 		stage.add("viewport").follow(player, {x:true, y: false});
 
@@ -536,6 +686,7 @@ Q.component("defaultEnemy", {
 
 
 
+		Q.LEVEL = 2;
 	});
 
 
@@ -583,7 +734,7 @@ Q.component("defaultEnemy", {
 		container.fit(20);
 
 
-
+		Q.LEVEL = 0;
 	});
 
 
@@ -642,10 +793,11 @@ Activar el LoadTMX cuando quiera
 /* METODO DE CARGA DE RECUROS */
 /*******************************************************************/
 	Q.loadTMX("level.tmx, level2.tmx,"+
-	 					"mainTitle.png, princess.png, mario_small.png, goomba.png, bloopa.png, coin.png, bowser.png, canyon.png, bullets.png, explosion.png, random.png,"+
-						"mario_small.json, goomba.json, bloopa.json, coin.json, bowser.json, canyon.json, bullets.json, explosion.json", function(){
+	 					"mainTitle.png, metalPlatformWire.png, princess.png, mario_small.png, goomba.png, bloopa.png, coin.png, bowser.png, canyon.png, bullets.png, explosion.png, random.png, doors.png,"+
+						"mario_small.json, goomba.json, bloopa.json, coin.json, bowser.json, canyon.json, bullets.json, explosion.json, doors.json", function(){
 					 // this will create the sprite sheets snail, slime and fly
 						Q.compileSheets("mario_small.png","mario_small.json");
+						Q.compileSheets("doors.png","doors.json");
 						Q.compileSheets("goomba.png","goomba.json");
 						Q.compileSheets("bloopa.png","bloopa.json");
 						Q.compileSheets("coin.png", "coin.json");
@@ -699,7 +851,7 @@ Activar el LoadTMX cuando quiera
 						/*usamos sheet propio:*/
 						//Q.sheet("mario_small","mario_small.png", { tilew: 32, tileh: 32 });
 						Q.sheet("princess","princess.png", { tilew: 32, tileh: 32 });
-						Q.stageScene("tittle");
+						Q.stageScene("level1");
 
 					});
 

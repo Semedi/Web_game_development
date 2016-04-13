@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="60" height="18" tilewidth="34" tileheight="34" nextobjectid="5">
- <tileset firstgid="1" name="tiles" tilewidth="34" tileheight="34" tilecount="49" columns="7">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="60" height="18" tilewidth="34" tileheight="34">
+ <tileset firstgid="1" name="tiles" tilewidth="34" tileheight="34">
   <image source="../images/tiles.png" width="256" height="256"/>
  </tileset>
- <tileset firstgid="50" name="goomba" tilewidth="34" tileheight="34" tilecount="6" columns="3">
+ <tileset firstgid="50" name="goomba" tilewidth="34" tileheight="34">
   <image source="../images/goomba.png" width="128" height="96"/>
  </tileset>
+ <tileset firstgid="56" name="doors" tilewidth="70" tileheight="102">
+  <image source="../images/doors.png" width="140" height="110"/>
+  <tile id="0">
+   <properties>
+    <property name="Class" value="Door"/>
+    <property name="open" value="false"/>
+    <property name="sprite" value="door_closed"/>
+   </properties>
+  </tile>
+ </tileset>
  <imagelayer name="background">
-  <image source="../images/bg.png" width="800" height="600"/>
+  <image source="../images/bg.png"/>
  </imagelayer>
  <layer name="Collision" width="60" height="18">
   <properties>
@@ -1009,7 +1019,7 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-   <tile gid="15"/>
+   <tile gid="12"/>
    <tile gid="15"/>
    <tile gid="15"/>
    <tile gid="15"/>
@@ -1065,11 +1075,11 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="0"/>
-   <tile gid="15"/>
+   <tile gid="47"/>
+   <tile gid="12"/>
+   <tile gid="12"/>
+   <tile gid="12"/>
+   <tile gid="12"/>
    <tile gid="15"/>
    <tile gid="15"/>
    <tile gid="15"/>
